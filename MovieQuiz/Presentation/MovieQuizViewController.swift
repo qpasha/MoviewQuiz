@@ -23,6 +23,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        imageView.layer.cornerRadius = 6
+        
         statisticService = StatisticService()
         
         alertPresenter = AlertPresenter(viewController: self)
@@ -89,14 +91,12 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         
         view.isUserInteractionEnabled = false // Блокируем нажатия, пока не появится следующий вопрос
 
-        
         if isCorrect {
             correctAnswers += 1
         }
         imageView.layer.masksToBounds = true  // даём разрешение на рисование рамки
         imageView.layer.borderWidth = 8 // толщина рамки
         imageView.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
-        imageView.layer.cornerRadius = 6
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             guard let self = self else { return }
@@ -150,26 +150,3 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         }
     }
 }
-
-// Приватный метод для показа результатов раунда квиза
-// Принимает вью модель QuizResultsViewModel и ничего не возвращает
-// Добавлена новая логика отображения Алерта через AlertPresenter, закомментировал, если понадобится
-//    private func show(quiz result: QuizResultsViewModel) {
-//        let alert = UIAlertController(
-//            title: result.title,
-//            message: result.text,
-//            preferredStyle: .alert)
-//        
-//        let action = UIAlertAction(title: result.buttonText, style: .default) { [weak self] _ in
-//            guard let self = self else { return }
-//            self.currentQuestionIndex = 0
-//            self.correctAnswers = 0
-//            
-//            self.questionFactory?.requestNextQuestion()
-//        }
-//        
-//        alert.addAction(action)
-//        
-//        self.present(alert, animated: true, completion: nil)
-//    }
-//}

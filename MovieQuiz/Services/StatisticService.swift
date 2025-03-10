@@ -71,7 +71,7 @@ final class StatisticService: StatisticServiceProtocol {
     var totalAccuracy: Double {
         // отношение всех правильных ответов от общего числа вопросов
         get {
-            guard totalQuestions > 0 else { return 0.0 } // Защита от деления на 0
+            guard totalQuestions > 0 else { return 0.0 }
             return (Double(correctAnswers) / Double(totalQuestions)) * 100
         }
     }
