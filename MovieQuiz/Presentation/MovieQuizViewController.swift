@@ -23,7 +23,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        imageView.layer.cornerRadius = 6
+        imageView.layer.cornerRadius = 20
         
         statisticService = StatisticService()
         
