@@ -19,20 +19,20 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     @IBOutlet private var imageView: UIImageView!
     @IBOutlet private var counterLabel: UILabel!
     @IBOutlet private var textLabel: UILabel!
+    @IBOutlet private var activityIndicator: UIActivityIndicatorView!
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         imageView.layer.cornerRadius = 20
+        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
         
         statisticService = StatisticService()
         
-        alertPresenter = AlertPresenter(viewController: self)
-        let questionFactory = QuestionFactory()
-        questionFactory.delegate = self
-        self.questionFactory = questionFactory
+        showLoadingIndicator()
+        questionFactory?.loadData()
         
-        questionFactory.requestNextQuestion()
+        alertPresenter = AlertPresenter(viewController: self)
     }
     
     // MARK: - QuestionFactoryDelegate
@@ -48,7 +48,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     // MARK: - IBActions
-    // метод вызывается, когда пользователь нажимает на кнопку "Да"
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
         guard let currentQuestion = currentQuestion else { return }
         let givenAnswer = true
@@ -56,7 +55,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
     
-    // метод вызывается, когда пользователь нажимает на кнопку "Нет"
     @IBAction private func noButtonClicked(_ sender: UIButton) {
         guard let currentQuestion = currentQuestion else { return }
         let givenAnswer = false
@@ -65,16 +63,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     // MARK: - Private functions
-    // метод конвертации, который принимает моковый вопрос и возвращает вью модель для экрана вопроса
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
-        let questionStep = QuizStepViewModel(
-            image: UIImage(named: model.image) ?? UIImage(),
+        return QuizStepViewModel(
+            image: UIImage(data: model.image) ?? UIImage(),
             question: model.text,
             questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
-        return questionStep
     }
     
-    // приватный метод вывода на экран вопроса, который принимает на вход вью модель вопроса и ничего не возвращает
     private func show(quiz step: QuizStepViewModel) {
         imageView.image = step.image
         textLabel.text = step.question
@@ -82,20 +77,19 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         imageView.layer.borderWidth = 0
         
         view.isUserInteractionEnabled = true // Включаем взаимодействие после загрузки вопроса
-
+        
     }
     
     // приватный метод, который меняет цвет рамки
-    // принимает на вход булевое значение и ничего не возвращает
     private func showAnswerResult(isCorrect: Bool) {
         
         view.isUserInteractionEnabled = false // Блокируем нажатия, пока не появится следующий вопрос
-
+        
         if isCorrect {
             correctAnswers += 1
         }
-        imageView.layer.masksToBounds = true  // даём разрешение на рисование рамки
-        imageView.layer.borderWidth = 8 // толщина рамки
+        imageView.layer.masksToBounds = true
+        imageView.layer.borderWidth = 8
         imageView.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
@@ -105,22 +99,17 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         }
     }
     
-    // приватный метод, который содержит логику перехода в один из сценариев
-    // метод ничего не принимает и ничего не возвращает
     private func showNextQuestionOrResult() {
         guard let statisticService = statisticService else { return }
         
         if currentQuestionIndex == questionsAmount - 1 {
-            
-            // Сохраняем результаты игры
+            // Сохраняем статистику
             statisticService.store(correct: correctAnswers, total: questionsAmount)
             
-            // Получаем актуальные данные из статистики
             let totalGames = statisticService.gamesCount
             let bestGame = statisticService.bestGame
             let accuracy = String(format: "%.2f", statisticService.totalAccuracy)
-
-            // Формируем сообщение в алерте
+            
             let message = """
                 Ваш результат: \(correctAnswers)/\(questionsAmount)
                 Количество сыгранных квизов: \(totalGames)
@@ -128,18 +117,20 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
                 Средняя точность: \(accuracy)%
                 """
             
-            // идём в состояние "Результат квиза"
             let alertModel = AlertModel(
-                title: "Этот раунд окончен",
+                title: "Игра окончена!",
                 message: message,
                 buttonText: "Сыграть ещё раз",
                 completion: { [weak self] in
                     guard let self = self else { return }
-            
-                // Обновляем состояние и запускаем игру заново
-            self.currentQuestionIndex = 0
-            self.correctAnswers = 0
-            self.questionFactory?.requestNextQuestion()
+                    
+                    self.currentQuestionIndex = 0
+                    self.correctAnswers = 0
+                    
+                    self.showLoadingIndicator()
+                    
+                    // Если нет интернета, появится `showNetworkError()`
+                    self.questionFactory?.loadData()
                 }
             )
             
@@ -147,6 +138,50 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         } else {
             currentQuestionIndex += 1
             questionFactory?.requestNextQuestion()
+        }
+    }
+    
+    private func showLoadingIndicator() {
+        activityIndicator.isHidden = false
+        activityIndicator.startAnimating()
+    }
+    
+    private func hideLoadingIndicator() {
+        activityIndicator.isHidden = true
+        activityIndicator.stopAnimating()
+    }
+    
+    
+    private func showNetworkError(message: String) {
+        hideLoadingIndicator()
+        
+        // Разблокируем кнопки, чтобы игрок мог нажать "Попробовать снова"
+        view.isUserInteractionEnabled = true
+        
+        let model = AlertModel(title: "Ошибка",
+                               message: message,
+                               buttonText: "Попробовать еще раз") { [weak self] in
+            guard let self = self else { return }
+            
+            if self.currentQuestionIndex == 0 {
+                self.showLoadingIndicator()
+                self.questionFactory?.loadData()
+            } else {
+                self.questionFactory?.requestNextQuestion()
+            }
+        }
+        
+        alertPresenter?.showAlert(with: model)
+    }
+    
+    func didLoadDataFromServer() {
+        activityIndicator.isHidden = true
+        questionFactory?.requestNextQuestion()
+    }
+    
+    func didFailToLoadData(with error: Error) {
+        DispatchQueue.main.async {
+            self.showNetworkError(message: "Не удалось загрузить изображение.\nОшибка: \(error.localizedDescription)")
         }
     }
 }

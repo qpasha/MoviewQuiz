@@ -52,7 +52,7 @@
                                             <constraint firstAttribute="width" secondItem="OWb-Fc-Uhi" secondAttribute="height" multiplier="2:3" id="G2G-RP-Gjd"/>
                                         </constraints>
                                     </imageView>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="252" verticalHuggingPriority="252" text="Рейтинг этого фильма меньше, чем 5?" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pwD-eX-dmi" userLabel="Question Label">
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="252" verticalHuggingPriority="252" text="Рейтинг этого фильма больше, чем 7?" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pwD-eX-dmi" userLabel="Question Label">
                                         <rect key="frame" x="0.0" y="566.33333333333337" width="335" height="71.666666666666629"/>
                                         <fontDescription key="fontDescription" name="YSDisplay-Bold" family="YS Display" pointSize="23"/>
                                         <color key="textColor" name="YP White"/>
@@ -102,17 +102,23 @@
                                     </stackView>
                                 </subviews>
                             </stackView>
+                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="medium" translatesAutoresizingMaskIntoConstraints="NO" id="j1U-Bj-52N">
+                                <rect key="frame" x="177.66666666666666" y="396" width="20" height="20"/>
+                            </activityIndicatorView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" name="YP Black"/>
                         <constraints>
+                            <constraint firstItem="j1U-Bj-52N" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="59y-Nu-0AG"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="PgC-dN-Ihe" secondAttribute="trailing" constant="20" id="8Z9-nx-bzb"/>
                             <constraint firstItem="PgC-dN-Ihe" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="10" id="GK4-R2-zhU"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="PgC-dN-Ihe" secondAttribute="bottom" id="PeG-IX-foq"/>
                             <constraint firstItem="PgC-dN-Ihe" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="X1M-iB-XTb"/>
+                            <constraint firstItem="j1U-Bj-52N" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="hYj-We-62w"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="activityIndicator" destination="j1U-Bj-52N" id="LHh-Nz-TUe"/>
                         <outlet property="counterLabel" destination="2oT-2u-4Dd" id="e13-sg-6nT"/>
                         <outlet property="imageView" destination="OWb-Fc-Uhi" id="Ghl-gj-A7q"/>
                         <outlet property="noButton" destination="rBv-ZJ-bVz" id="4o3-ns-nbm"/>
