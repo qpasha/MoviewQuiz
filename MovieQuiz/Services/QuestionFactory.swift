@@ -33,7 +33,7 @@ class QuestionFactory: QuestionFactoryProtocol {
                 print("Ошибка загрузки изображения: \(error.localizedDescription)")
 
                 DispatchQueue.main.async { [weak self] in
-                    self?.delegate?.didFailToLoadData(with: error) // Передаем ошибку во ViewController
+                    self?.delegate?.didFailToLoadData(with: error)
                 }
                 return
             }
@@ -49,7 +49,7 @@ class QuestionFactory: QuestionFactoryProtocol {
             
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
-                self.delegate?.didReceiveNextQuestion(question: question)
+                self.delegate?.didRecieveNextQuestion(question: question)
             }
         }
     } 
